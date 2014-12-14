@@ -34,6 +34,26 @@ namespace ClassLibrary3
         }
 
         [Test]
+        public void DetermineWhetherDebugModeBehavesDifferently()
+        {
+            var wasCollected = false;
+            {
+                var foo = new ExpensiveClass(() => wasCollected = true);
+            }
+            Thread.Sleep(TimeSpan.FromSeconds(10));
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+#if DEBUG
+            Assert.IsTrue(wasCollected, "This disproves Stuart's original assumption that lifespan can be influenced, even in Debug builds");
+#endif
+            {
+                Bar foo = new Bar(); // impairs readability
+            }
+            Thread.Sleep(TimeSpan.FromSeconds(10));
+        }
+
+        
+        [Test]
         public void DetermineWhetherGCCanCollectIfInScope()
         {
             var wasCollected = false;
@@ -41,7 +61,9 @@ namespace ClassLibrary3
             GC.Collect();
             GC.WaitForPendingFinalizers();
 #if !DEBUG
-            Assert.IsTrue(wasCollected, "Thus proving @LasseKarlsens point, viz that collection can happen early irrespective of scope");
+            Assert.IsTrue(wasCollected, "Thus proving @LasseKarlsens point, viz that collection can happen early irrespective of scope, but only in release builds");
+#else
+            Assert.IsFalse(wasCollected, "Thus proving @LasseKarlsens point, viz that collection can happen early irrespective of scope, but only in release builds");
 #endif
             var bar = new Bar();
         }
