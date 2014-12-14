@@ -44,7 +44,7 @@ namespace ClassLibrary3
             GC.Collect();
             GC.WaitForPendingFinalizers();
 #if DEBUG
-            Assert.IsTrue(wasCollected, "This disproves Stuart's original assumption that lifespan can be influenced, even in Debug builds");
+            Assert.IsTrue(wasCollected, "This fails, disproving my original assumption that lifespan can be influenced, even in Debug builds");
 #endif
             {
                 Bar foo = new Bar(); // impairs readability
